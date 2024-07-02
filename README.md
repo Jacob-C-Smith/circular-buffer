@@ -45,10 +45,21 @@
  ```
  ### Example output
  ```
- Third!
- Fourth!
- Fifth!
- Sixth!
+Creating a circular buffer of size 4
+
+Adding "First!"
+Adding "Second!"
+Adding "Third!"
+Adding "Fourth!"
+Adding "Fifth!"
+Adding "Sixth!"
+
+Dumping contents of circular buffer
+
+"Third!"
+"Fourth!"
+"Fifth!"
+"Sixth!"
  ```
  [Source](main.c)
 ## Tester
