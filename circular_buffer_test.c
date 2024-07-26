@@ -88,6 +88,11 @@ int construct_CBA_dequeue_CB   ( queue **pp_queue );
 // Entry point
 int main ( int argc, const char* argv[] )
 {
+
+    // Supress compiler warnings
+	(void) argc;
+	(void) argv;
+
     /*
     // Initialized data
     timestamp t0 = 0,
