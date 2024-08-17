@@ -1,18 +1,24 @@
-/*
- * @file queue tester
- * @author Jacob C Smith
+/** ! 
+ * Circular buffer tester
+ * 
+ * @file circular_buffer_test.c
+ * 
+ * @author Jacob Smith
+ */
 
-
-// TODO: Improve documentation
-
-// Include
+// Standard library
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 
+// log module
 #include <log/log.h>
 
-#include <queue/queue.h>
+// sync module
+#include <sync/sync.h>
+
+// circular buffer module
+#include <circular_buffer/circular_buffer.h>
 
 // Possible elements
 void *A_element = (void *)0x1,
@@ -25,6 +31,7 @@ void *A_element = (void *)0x1,
 void  *_contents    [] = { (void *)0x0 };
 void  *A_contents   [] = { (void *)0x1, (void *)0x0 };
 void  *B_contents   [] = { (void *)0x2, (void *)0x0 };
+void  *C_contents   [] = { (void *)0x3, (void *)0x0 };
 void  *AB_contents  [] = { (void *)0x1, (void *)0x2, (void *)0x0 };
 void  *BA_contents  [] = { (void *)0x2, (void *)0x1, (void *)0x0 };
 void  *BC_contents  [] = { (void *)0x2, (void *)0x3, (void *)0x0 };
@@ -59,32 +66,53 @@ int print_final_summary ( void );
 int print_test          ( const char  *scenario_name, const char *test_name, bool passed );
 int print_time_pretty   ( double seconds );
 
-bool test_front   ( int (*queue_constructor)(queue **), void *expected_value  , result_t expected );
-bool test_rear    ( int (*queue_constructor)(queue **), void *expected_value  , result_t expected );
-bool test_enqueue ( int (*queue_constructor)(queue **), void *value           , result_t expected );
-bool test_dequeue ( int (*queue_constructor)(queue **), void *expected_value  , size_t   num_dequeues, result_t expected );
-bool test_empty   ( int (*queue_constructor)(queue **), void **expected_values, result_t expected );
+bool test_empty   ( int (*circular_buffer_constructor)(circular_buffer **), result_t expected );
+bool test_full    ( int (*circular_buffer_constructor)(circular_buffer **), result_t expected );
+bool test_push    ( int (*circular_buffer_constructor)(circular_buffer **), void *value           , result_t expected );
+bool test_peek    ( int (*circular_buffer_constructor)(circular_buffer **), char *expected_value  , result_t expected );
+bool test_pop     ( int (*circular_buffer_constructor)(circular_buffer **), void **expected_values, result_t expected );
 
-int test_empty_queue         ( int (*queue_constructor)(queue **), char *name );
-int test_one_element_queue   ( int (*queue_constructor)(queue **), char *name, void **elements );
-int test_two_element_queue   ( int (*queue_constructor)(queue **), char *name, void **elements );
-int test_three_element_queue ( int (*queue_constructor)(queue **), char *name, void **elements );
+int test_empty_circular_buffer         ( int (*circular_buffer_constructor)(circular_buffer **), char *name );
+int test_one_element_circular_buffer   ( int (*circular_buffer_constructor)(circular_buffer **), char *name, void **elements );
+int test_two_element_circular_buffer   ( int (*circular_buffer_constructor)(circular_buffer **), char *name, void **elements );
+int test_three_element_circular_buffer ( int (*circular_buffer_constructor)(circular_buffer **), char *name, void **elements );
 
-int construct_empty            ( queue **pp_queue );
-int construct_empty_enqueueA_A ( queue **pp_queue );
-int construct_empty_enqueueB_B ( queue **pp_queue );
-int construct_A_dequeue_empty  ( queue **pp_queue ); 
-int construct_B_dequeue_empty  ( queue **pp_queue ); 
-int construct_A_enqueueB_BA    ( queue **pp_queue ); 
-int construct_B_enqueueA_AB    ( queue **pp_queue ); 
-int construct_AB_dequeue_A     ( queue **pp_queue ); 
-int construct_BA_dequeue_B     ( queue **pp_queue );
-int construct_AB_enqueueC_CAB  ( queue **pp_queue );
-int construct_BA_enqueueC_CBA  ( queue **pp_queue );
-int construct_CAB_dequeue_CA   ( queue **pp_queue );
-int construct_CBA_dequeue_CB   ( queue **pp_queue );
+int construct_empty            ( circular_buffer **pp_circular_buffer );
 
-*/
+int construct_empty_pushA_A    ( circular_buffer **pp_circular_buffer );
+int construct_empty_pushB_B    ( circular_buffer **pp_circular_buffer );
+int construct_empty_pushC_C    ( circular_buffer **pp_circular_buffer );
+
+int construct_A_pop_empty      ( circular_buffer **pp_circular_buffer );
+int construct_B_pop_empty      ( circular_buffer **pp_circular_buffer );
+int construct_C_pop_empty      ( circular_buffer **pp_circular_buffer );
+
+int construct_A_pushB_AB       ( circular_buffer **pp_circular_buffer );
+int construct_A_pushC_AC       ( circular_buffer **pp_circular_buffer );
+int construct_B_pushA_BA       ( circular_buffer **pp_circular_buffer );
+int construct_B_pushC_BC       ( circular_buffer **pp_circular_buffer );
+int construct_C_pushA_CA       ( circular_buffer **pp_circular_buffer );
+int construct_C_pushB_CB       ( circular_buffer **pp_circular_buffer );
+
+int construct_AB_pop_A ( circular_buffer **pp_circular_buffer );
+int construct_AC_pop_A ( circular_buffer **pp_circular_buffer );
+int construct_BA_pop_B ( circular_buffer **pp_circular_buffer );
+int construct_BC_pop_B ( circular_buffer **pp_circular_buffer );
+int construct_CA_pop_C ( circular_buffer **pp_circular_buffer );
+int construct_CB_pop_C ( circular_buffer **pp_circular_buffer );
+
+int construct_empty_enqueueB_B ( circular_buffer **pp_circular_buffer );
+int construct_A_dequeue_empty  ( circular_buffer **pp_circular_buffer ); 
+int construct_B_dequeue_empty  ( circular_buffer **pp_circular_buffer ); 
+int construct_A_enqueueB_BA    ( circular_buffer **pp_circular_buffer ); 
+int construct_B_enqueueA_AB    ( circular_buffer **pp_circular_buffer ); 
+int construct_AB_dequeue_A     ( circular_buffer **pp_circular_buffer ); 
+int construct_BA_dequeue_B     ( circular_buffer **pp_circular_buffer );
+int construct_AB_enqueueC_CAB  ( circular_buffer **pp_circular_buffer );
+int construct_BA_enqueueC_CBA  ( circular_buffer **pp_circular_buffer );
+int construct_CAB_dequeue_CA   ( circular_buffer **pp_circular_buffer );
+int construct_CBA_dequeue_CB   ( circular_buffer **pp_circular_buffer );
+
 // Entry point
 int main ( int argc, const char* argv[] )
 {
@@ -93,20 +121,15 @@ int main ( int argc, const char* argv[] )
 	(void) argc;
 	(void) argv;
 
-    /*
     // Initialized data
-    timestamp t0 = 0,
-              t1 = 0;
+    timestamp t0 = 0, t1 = 0;
 
-    // Initialize the timer library
-    timer_init();
-    log_init(0, true);
 
     // Formatting
     printf(
-        "╭──────────────╮\n"\
-        "│ queue tester │\n"\
-        "╰──────────────╯\n\n"
+        "╭────────────────────────╮\n"\
+        "│ circular buffer tester │\n"\
+        "╰────────────────────────╯\n\n"
     );
     
     // Start
@@ -119,17 +142,13 @@ int main ( int argc, const char* argv[] )
     t1 = timer_high_precision();
 
     // Report the time it took to run the tests
-    log_info("queue took ");
+    log_info("circular buffer took ");
     print_time_pretty ( (double)(t1-t0)/(double)timer_seconds_divisor() );
     log_info(" to test\n");
-    */
-    //return ( total_passes == total_tests ) ? EXIT_SUCCESS : EXIT_FAILURE;
 
-    // Exit
-    return 0;
+    // Done
+    return ( total_passes == total_tests ) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
-
-/*
 
 int print_time_pretty ( double seconds )
 {
@@ -192,263 +211,358 @@ int print_time_pretty ( double seconds )
 int run_tests()
 {
 
-    // ... -> []
-    test_empty_queue(construct_empty, "empty");
+    // ... -> [ _, _ ]
+    test_empty_circular_buffer(construct_empty, "empty");
 
-    // [] -> enqueue(A) -> [A]
-    test_one_element_queue(construct_empty_enqueueA_A, "empty_enqueueA_A", (void **) A_contents);
+    // [ _, _ ] -> push(A) -> [ A, _ ]
+    test_one_element_circular_buffer(construct_empty_pushA_A, "empty_pushA_A", A_contents);
 
-    // [] -> enqueue(B) -> [B]
-    test_one_element_queue(construct_empty_enqueueB_B, "empty_enqueueB_B", (void **) B_contents);
-
-    // [A] -> dequeue() -> []
-    test_empty_queue(construct_A_dequeue_empty, "A_dequeue_empty");
-
-    // [B] -> dequeue() -> []
-    test_empty_queue(construct_B_dequeue_empty, "B_dequeue_empty");
-
-    // [A] -> enqueue(B) -> [B,A]
-    test_two_element_queue(construct_A_enqueueB_BA, "A_enqueueB_BA", (void **) BA_contents);
+    // [ _, _ ] -> push(B) -> [ B, _ ]
+    test_one_element_circular_buffer(construct_empty_pushB_B, "empty_pushB_B", B_contents);
     
-    // [B] -> enqueue(A) -> [A,B]
-    test_two_element_queue(construct_B_enqueueA_AB, "B_enqueueA_AB", (void **) AB_contents);
+    // [ _, _ ] -> push(C) -> [ C, _ ]
+    test_one_element_circular_buffer(construct_empty_pushC_C, "empty_pushC_C", C_contents);
 
-    // [A,B] -> dequeue() -> [A]
-    test_one_element_queue(construct_AB_dequeue_A, "construct_AB_dequeue_A", (void **) A_contents);
+    // [ A, _ ] -> pop() -> [ _, _ ]
+    test_empty_circular_buffer(construct_A_pop_empty, "A_pop_empty");
 
-    // [B,A] -> dequeue() -> [B]
-    test_one_element_queue(construct_BA_dequeue_B, "construct_BA_dequeue_B", (void **) B_contents);
+    // [ B, _ ] -> pop() -> [ _, _ ]
+    test_empty_circular_buffer(construct_B_pop_empty, "B_pop_empty");
 
-    // [A,B] -> enqueue(C) -> [C,A,B]
-    test_three_element_queue(construct_AB_enqueueC_CAB, "AB_enqueueC_CAB", (void **) CAB_contents);
-    
-    // [A,B] -> enqueue(C) -> [C,B,A]
-    test_three_element_queue(construct_BA_enqueueC_CBA, "BA_enqueueC_CBA", (void **) CBA_contents);
-    
-    // [C,A,B] -> dequeue() -> [C,A]
-    test_two_element_queue(construct_CAB_dequeue_CA, "CAB_dequeue_CA", (void **) CA_contents);
+    // [ C, _ ] -> pop() -> [ _, _ ]
+    test_empty_circular_buffer(construct_C_pop_empty, "C_pop_empty");
 
-    // [C,B,A] -> dequeue() -> [C,B]
-    test_two_element_queue(construct_CBA_dequeue_CB, "CBA_dequeue_CB", (void **)CB_contents);
+    // [ A, _ ] -> push(B) -> [ A, B ]
+    // [ A, _ ] -> push(C) -> [ A, C ]
+    // [ B, _ ] -> push(A) -> [ B, A ]
+    // [ B, _ ] -> push(C) -> [ B, C ]
+    // [ C, _ ] -> push(A) -> [ C, A ]
+    // [ C, _ ] -> push(B) -> [ C, B ]
+
+    // [ A, B ] -> pop() -> [ A, _ ]
+    test_one_element_circular_buffer(construct_AB_pop_A, "AB_pop_A", A_contents);
+
+    // [ A, C ] -> pop() -> [ A, _ ]
+    test_one_element_circular_buffer(construct_AC_pop_A, "AC_pop_A", A_contents);
+
+    // [ B, A ] -> pop() -> [ B, _ ]
+    test_one_element_circular_buffer(construct_BA_pop_B, "BA_pop_B", B_contents);
+
+    // [ B, C ] -> pop() -> [ B, _ ]
+    test_one_element_circular_buffer(construct_BC_pop_B, "BC_pop_B", B_contents);
+
+    // [ C, A ] -> pop() -> [ C, _ ]
+    test_one_element_circular_buffer(construct_CA_pop_C, "CA_pop_C", C_contents);
+
+    // [ C, B ] -> pop() -> [ C, _ ]
+    test_one_element_circular_buffer(construct_CB_pop_C, "CB_pop_C", C_contents);
+
+
+    // [ A, B ] -> push(C) -> [ C, B ]
+    // [ A, C ] -> push(B) -> [ B, C ]
+    // [ B, A ] -> push(C) -> [ C, A ]
+    // [ B, C ] -> push(A) -> [ A, C ]
+    // [ C, A ] -> push(B) -> [ B, A ]
+    // [ C, B ] -> push(A) -> [ A, B ]
+
+    // // [ C, B ] -> pop() -> [ B, _ ]
+    // test_one_element_circular_buffer(construct_1CB_pop_B, "CBa_pop_B", B_contents);
+
+    // // [ B, C ] -> pop() -> [ C, _ ]
+    // test_one_element_circular_buffer(construct_1BC_pop_C, "AB_pop_A", A_contents);
+
+    // // [ C, A ] -> pop() -> [ A, _ ]
+    // test_one_element_circular_buffer(construct_AB_pop_A, "AB_pop_A", A_contents);
+
+    // // [ A, C ] -> pop() -> [ C, _ ]
+    // test_one_element_circular_buffer(construct_AB_pop_A, "AB_pop_A", A_contents);
+
+    // // [ B, A ] -> pop() -> [ A, _ ]
+    // test_one_element_circular_buffer(construct_AB_pop_A, "AB_pop_A", A_contents);
+
+    // // [ A, B ] -> pop() -> [ B, _ ]
+    // test_one_element_circular_buffer(construct_AB_pop_A, "AB_pop_A", A_contents);
+
 
     // Success
     return 1;
 }
 
-int construct_empty ( queue **pp_queue )
+int construct_empty ( circular_buffer **pp_circular_buffer )
 {
 
     // Construct a queue
-    queue_construct(pp_queue);
+    circular_buffer_construct(pp_circular_buffer, 2);
 
-    // queue = []
+    // circular_buffer = [ ]
     return 1;
 }
 
-int construct_empty_enqueueA_A(queue **pp_queue)
-{
+int construct_empty_pushA_A ( circular_buffer **pp_circular_buffer )
+{    
 
-    // Construct a [] queue
-    construct_empty(pp_queue);
+    // Construct a queue
+    construct_empty(pp_circular_buffer);
 
-    // enqueue(A)
-    queue_enqueue(*pp_queue, A_element);
+    // Push A 
+    circular_buffer_push(*pp_circular_buffer, A_element);
 
-    // queue = [A]
-    // Success
+    // circular_buffer = [ A, _ ]
     return 1;
 }
 
-int construct_empty_enqueueB_B(queue **pp_queue)
-{
+int construct_empty_pushB_B ( circular_buffer **pp_circular_buffer )
+{    
 
-    // Construct a [] queue
-    construct_empty(pp_queue);
+    // Construct a queue
+    construct_empty(pp_circular_buffer);
 
-    // enqueue(B)
-    queue_enqueue(*pp_queue, B_element);
+    // Push B
+    circular_buffer_push(*pp_circular_buffer, B_element);
 
-    // queue = [B]
-    // Success
+    // circular_buffer = [ B, _ ]
     return 1;
 }
 
-int construct_A_dequeue_empty(queue **pp_queue)
-{
+int construct_empty_pushC_C ( circular_buffer **pp_circular_buffer )
+{    
 
-    // Construct a [A] queue
-    construct_empty_enqueueA_A(pp_queue);
+    // Construct a queue
+    construct_empty(pp_circular_buffer);
 
-    // dequeue()
-    queue_dequeue(*pp_queue, (void **)0);
+    // Push C
+    circular_buffer_push(*pp_circular_buffer, C_element);
 
-    // queue = []
-    // Success
+    // circular_buffer = [ C, _ ]
     return 1;
 }
 
-int construct_B_dequeue_empty ( queue **pp_queue )
+int construct_A_pop_empty ( circular_buffer **pp_circular_buffer )
 {
-    // Construct a [B] queue
-    construct_empty_enqueueB_B(pp_queue);
 
-    // dequeue()
-    queue_dequeue(*pp_queue, (void **)0);
-
-    // queue = []
-    // Success
-    return 1;
-}
-
-int construct_A_enqueueB_BA ( queue **pp_queue )
-{
-    // Construct a [A] queue
-    construct_empty_enqueueA_A(pp_queue);
-
-    // enqueue(B)
-    queue_enqueue(*pp_queue, B_element);
-
-    // queue = [B,A]
-    // Success
-    return 1;
-}
-
-int construct_B_enqueueA_AB ( queue **pp_queue )
-{
-    // Construct a [B] queue
-    construct_empty_enqueueB_B(pp_queue);
-
-    // enqueue(A)
-    queue_enqueue(*pp_queue, A_element);
+    // Initialized data
+    void *result = (void *) 0;
     
-    // queue = [A,B]
+    // Construct a circular buffer
+    construct_empty_pushA_A(pp_circular_buffer);
+
+    // Pop an element
+    circular_buffer_pop(*pp_circular_buffer, &result);
+
     // Success
     return 1;
+
 }
 
-int construct_AB_dequeue_A ( queue **pp_queue )
-{
-    // Construct a [A,B] queue
-    construct_B_enqueueA_AB(pp_queue);
-
-    // dequeue()
-    queue_dequeue(*pp_queue, (void **)0);
-
-    // queue = [A]
-    // Success
-    return 1;
-}
-
-int construct_BA_dequeue_B ( queue **pp_queue )
-{
-    // Construct a [B,A] queue
-    construct_A_enqueueB_BA(pp_queue);
-
-    // dequeue()
-    queue_dequeue(*pp_queue, (void **)0);
-
-    // queue = [B]
-    // Success
-    return 1;
-}
-
-int construct_AB_enqueueC_CAB ( queue **pp_queue )
-{
-    // Construct a [] queue
-    construct_B_enqueueA_AB(pp_queue);
-
-    // enqueue(C)
-    queue_enqueue(*pp_queue, C_element);
-
-    // queue = [C,A,B]
-    // Success
-    return 1;
-}
-
-int construct_BA_enqueueC_CBA ( queue **pp_queue )
-{
-    // Construct a [B,A] queue
-    construct_A_enqueueB_BA(pp_queue);
-
-    // enqueue(C)
-    queue_enqueue(*pp_queue, C_element);
-
-    // queue = [C,B,A]
-    // Success
-    return 1;
-}
-
-int construct_CAB_dequeue_CA ( queue **pp_queue )
-{
-    // Construct a [C,A,B] queue
-    construct_AB_enqueueC_CAB(pp_queue);
-
-    // dequeue()
-    queue_dequeue(*pp_queue, (void **)0);
-
-    // queue = [C,A]
-    // Success
-    return 1;
-}
-
-int construct_CBA_dequeue_CB ( queue **pp_queue )
-{
-    // Construct a [C,B,A] queue
-    construct_BA_enqueueC_CBA(pp_queue);
-
-    // dequeue()
-    queue_dequeue(*pp_queue, (void **)0);
-
-    // queue = [C,B]
-    // Success
-    return 1;
-}
-
-int test_empty_queue(int(*queue_constructor)(queue **pp_queue), char *name)
+int construct_B_pop_empty ( circular_buffer **pp_circular_buffer )
 {
 
-    // Initialized_data
-    queue *p_queue = 0;
+    // Initialized data
+    void *result = (void *) 0;
     
-    // Call the queue constructor
-    queue_constructor(&p_queue);
+    // Construct a circular buffer
+    construct_empty_pushB_B(pp_circular_buffer);
 
-    log_info("Scenario: %s\n", name);
+    // Pop an element
+    circular_buffer_pop(*pp_circular_buffer, &result);
 
-    print_test(name, "queue_front"  , test_front(queue_constructor, (void *)0, zero) );
-    print_test(name, "queue_rear"   , test_rear(queue_constructor, (void *)0, zero) );
-    print_test(name, "queue_enqueue", test_enqueue(queue_constructor, A_element, one) );
-    print_test(name, "queue_dequeue", test_dequeue(queue_constructor, (void **)zero, 1, Underflow) );    
-    print_test(name, "queue_empty"  , test_empty(queue_constructor, 0, True) );
+    // Success
+    return 1;
+}
 
+int construct_C_pop_empty ( circular_buffer **pp_circular_buffer )
+{
+
+    // Initialized data
+    void *result = (void *) 0;
+    
+    // Construct a circular buffer
+    construct_empty_pushC_C(pp_circular_buffer);
+
+    // Pop an element
+    circular_buffer_pop(*pp_circular_buffer, &result);
+
+    // Success
+    return 1;
+
+}
+
+int construct_A_pushB_AB ( circular_buffer **pp_circular_buffer )
+{
+
+    construct_empty_pushA_A(pp_circular_buffer);
+
+    circular_buffer_push(*pp_circular_buffer, B_element);
+
+    // circular_buffer = [ A, B ]
+    return 1;
+}
+
+int construct_A_pushC_AC ( circular_buffer **pp_circular_buffer )
+{
+
+    construct_empty_pushA_A(pp_circular_buffer);
+
+    circular_buffer_push(*pp_circular_buffer, C_element);
+
+    // circular_buffer = [ A, B ]
+    return 1;
+}
+
+int construct_B_pushA_BA ( circular_buffer **pp_circular_buffer )
+{
+
+    construct_empty_pushB_B(pp_circular_buffer);
+
+    circular_buffer_push(*pp_circular_buffer, A_element);
+
+    // circular_buffer = [ A, B ]
+    return 1;
+}
+
+int construct_B_pushC_BC ( circular_buffer **pp_circular_buffer )
+{
+
+    construct_empty_pushB_B(pp_circular_buffer);
+
+    circular_buffer_push(*pp_circular_buffer, C_element);
+
+    // circular_buffer = [ A, B ]
+    return 1;
+}
+
+int construct_C_pushA_CA ( circular_buffer **pp_circular_buffer )
+{
+
+    construct_empty_pushC_C(pp_circular_buffer);
+
+    circular_buffer_push(*pp_circular_buffer, A_element);
+
+    // circular_buffer = [ A, B ]
+    return 1;
+}
+
+int construct_C_pushB_CB ( circular_buffer **pp_circular_buffer )
+{
+
+    construct_empty_pushC_C(pp_circular_buffer);
+
+    circular_buffer_push(*pp_circular_buffer, B_element);
+
+    // circular_buffer = [ A, B ]
+    return 1;
+}
+
+
+int construct_AB_pop_A ( circular_buffer **pp_circular_buffer )
+{
+    
+    void *result = (void *) 0;
+    
+    construct_A_pushB_AB(pp_circular_buffer);
+
+    circular_buffer_pop(*pp_circular_buffer, &result);
+
+    return 1;
+}
+
+int construct_AC_pop_A ( circular_buffer **pp_circular_buffer )
+{
+    
+    void *result = (void *) 0;
+    
+    construct_A_pushC_AC(pp_circular_buffer);
+
+    circular_buffer_pop(*pp_circular_buffer, &result);
+
+    return 1;
+}
+
+int construct_BA_pop_B ( circular_buffer **pp_circular_buffer )
+{
+    
+    void *result = (void *) 0;
+    
+    construct_B_pushA_BA(pp_circular_buffer);
+
+    circular_buffer_pop(*pp_circular_buffer, &result);
+
+    return 1;
+}
+
+int construct_BC_pop_B ( circular_buffer **pp_circular_buffer )
+{
+    
+    void *result = (void *) 0;
+    
+    construct_B_pushC_BC(pp_circular_buffer);
+
+    circular_buffer_pop(*pp_circular_buffer, &result);
+
+    return 1;
+}
+
+int construct_CA_pop_C ( circular_buffer **pp_circular_buffer )
+{
+    
+    void *result = (void *) 0;
+    
+    construct_C_pushA_CA(pp_circular_buffer);
+
+    circular_buffer_pop(*pp_circular_buffer, &result);
+
+    return 1;
+}
+
+int construct_CB_pop_C ( circular_buffer **pp_circular_buffer )
+{
+    
+    void *result = (void *) 0;
+    
+    construct_C_pushB_CB(pp_circular_buffer);
+
+    circular_buffer_pop(*pp_circular_buffer, &result);
+
+    return 1;
+}
+
+
+int test_empty_circular_buffer(int(*circular_buffer_constructor)(circular_buffer **pp_circular_buffer), char *name)
+{
+
+    log_scenario("%s\n", name);
+
+    print_test(name, "circular_buffer_empty", test_empty(circular_buffer_constructor, True) );
+    print_test(name, "circular_buffer_full" , test_full(circular_buffer_constructor, False) );
+    // print_test(name, "circular_buffer_push" , test_push(circular_buffer_constructor, A_element, one) );
+    print_test(name, "circular_buffer_peek" , test_peek(circular_buffer_constructor, (void **)zero, zero) );    
+    // print_test(name, "circular_buffer_pop"  , test_pop(circular_buffer_constructor, 0, True) );
+
+    // Print the final summary
     print_final_summary();
 
+    // Success
     return 1;
 }
 
-int test_one_element_queue   ( int (*queue_constructor)(queue **), char *name, void **elements )
+
+int test_one_element_circular_buffer   ( int (*circular_buffer_constructor)(circular_buffer **), char *name, void **elements )
 {
-
-    // Initialized_data
-    queue *p_queue = 0;
     
+    log_scenario("%s\n", name);
 
-    log_info("Scenario: %s\n", name);
-
-    print_test(name, "queue_front"    , test_front(queue_constructor, elements[0], match) );
-    print_test(name, "queue_rear"     , test_rear(queue_constructor, elements[0], match) );
-    print_test(name, "queue_enqueue"  , test_enqueue(queue_constructor, D_element, one) );
-    print_test(name, "queue_dequeue_0", test_dequeue(queue_constructor, elements[0], 1, match) );
-    print_test(name, "queue_dequeue_3", test_dequeue(queue_constructor, 0, 3, Underflow) );
-    print_test(name, "queue_empty"    , test_empty(queue_constructor, 0, False) );
-
+    print_test(name, "circular_buffer_empty", test_empty(circular_buffer_constructor, False) );
+    print_test(name, "circular_buffer_full" , test_full(circular_buffer_constructor, False) );
+    print_test(name, "circular_buffer_peek" , test_peek(circular_buffer_constructor, elements[0], match) );    
+    
+    // Print the final summary
     print_final_summary();
 
     // Success
     return 1;
 }
-
-int test_two_element_queue   ( int (*queue_constructor)(queue **), char *name, void **elements )
+/*
+int test_two_element_circular_buffer   ( int (*queue_constructor)(queue **), char *name, void **elements )
 {
 
     log_info("Scenario: %s\n", name);
@@ -468,64 +582,20 @@ int test_two_element_queue   ( int (*queue_constructor)(queue **), char *name, v
     // Success
     return 1;
 }
-
-int test_three_element_queue   ( int (*queue_constructor)(queue **), char *name, void **elements )
-{
-
-    // Initialized_data
-    queue *p_queue = 0;
-    
-    // Call the queue constructor
-    queue_constructor(&p_queue);
-
-    log_info("Scenario: %s\n", name);
-
-    print_test(name, "queue_front"  , test_front(queue_constructor, elements[2], match) );
-    print_test(name, "queue_rear"   , test_rear(queue_constructor, elements[0], match) );
-    print_test(name, "queue_enqueue", test_enqueue(queue_constructor, D_element, one) );
-   
-    for (size_t i = 0; elements[i]; i++)
-    {
-        char *test_name = calloc(15+1, sizeof(char));
-        sprintf(test_name, "queue_dequeue_%lld", i);
-        print_test(name, test_name , test_dequeue(queue_constructor, elements[2-i], i+1, match) );
-        free(test_name);
-    }
-    
-    // Force an underflow
-    print_test(name, "queue_dequeue_3", test_dequeue(queue_constructor, 0, 3, Underflow) );
-
-    print_test(name, "queue_empty"  , test_empty(queue_constructor, 0, False) );
-
-    print_final_summary();
-
-    // Success
-    return 1;
-}
+*/
 
 int print_test ( const char *scenario_name, const char *test_name, bool passed )
 {
 
     // Initialized data
-    if ( passed )
-        log_pass("%s %s\n", scenario_name, test_name);
-    else
-        log_fail("%s %s\n", scenario_name, test_name);
-
+    if ( passed ) log_pass("%s %s\n", scenario_name, test_name);
+    else          log_fail("%s %s\n", scenario_name, test_name);
 
     // Increment the counters
-    {
-        if (passed)
-        {
-            ephemeral_passes++;
-        }
-        else
-        {
-            ephemeral_fails++;
-        }
+    if (passed) ephemeral_passes++;
+    else        ephemeral_fails++;
 
-        ephemeral_tests++;
-    }
+    ephemeral_tests++;
 
     // Success
     return 1;
@@ -543,88 +613,86 @@ int print_final_summary ()
     log_info("\nTests: %d, Passed: %d, Failed: %d (%%%.3f)\n",  ephemeral_tests, ephemeral_passes, ephemeral_fails, ((float)ephemeral_passes/(float)ephemeral_tests*100.f));
     log_info("Total: %d, Passed: %d, Failed: %d (%%%.3f)\n\n",  total_tests, total_passes, total_fails, ((float)total_passes/(float)total_tests*100.f));
     
-    ephemeral_tests  = 0;
-    ephemeral_passes = 0;
+    ephemeral_tests  = 0,
+    ephemeral_passes = 0,
     ephemeral_fails  = 0;
 
     // Success
     return 1;
 }
 
-bool test_front ( int (*queue_constructor)(queue **), void *expected_value, result_t expected )
+
+bool test_empty ( int (*circular_buffer_constructor)(circular_buffer **), result_t expected )
 {
 
     // Initialized data
-    result_t  result       = 0;
-    queue    *p_queue      = 0;
-    void     *result_value = 0;
+    result_t         result = 0;
+    circular_buffer *p_queue = 0;
 
     // Build the queue
-    queue_constructor(&p_queue);
+    circular_buffer_constructor(&p_queue);
 
-    // Get the front
-    result = queue_front(p_queue, &result_value);
-
-    // Check the result
-    if (result == zero)
-    {
-        goto exit;
-    }
-    else if (result_value == expected_value)
-    {
-        result = match; // Match implies queue_front reutrned 1
-    }
-    else
-    {
-        result = one;
-    }
-
-    exit:
+    // Store the result
+    result = circular_buffer_empty(p_queue);
 
     // Free the queue
-    queue_destroy(&p_queue);
+    circular_buffer_destroy(&p_queue);
 
     // Return result
     return (result == expected);
 }
 
-bool test_rear ( int (*queue_constructor)(queue **), void *expected_value, result_t expected )
+bool test_full ( int (*circular_buffer_constructor)(circular_buffer **), result_t expected )
 {
-    
+
     // Initialized data
-    result_t  result       = 0;
-    queue    *p_queue      = 0;
-    void     *result_value = 0;
+    result_t         result = 0;
+    circular_buffer *p_queue = 0;
 
     // Build the queue
-    queue_constructor(&p_queue);
+    circular_buffer_constructor(&p_queue);
 
-    // Get the rear
-    result = queue_rear(p_queue, &result_value);
-
-    // Check the result
-    if (result == zero)
-    {
-        goto exit;
-    }
-    else if (result_value == expected_value)
-    {
-        result = match; // Match implies queue_rear reutrned 1
-    }
-    else
-    {
-        result = zero;
-    }
-
-    exit:
+    // Store the result
+    result = circular_buffer_full(p_queue);
 
     // Free the queue
-    queue_destroy(&p_queue);
+    circular_buffer_destroy(&p_queue);
 
     // Return result
     return (result == expected);
 }
 
+
+bool test_peek ( int (*circular_buffer_constructor)(circular_buffer **), char *expected_value, result_t expected )
+{
+
+    // Argument check
+    //if ( expected_value == (void *) 0 ) return false;
+
+    // Initialized data
+    result_t         result            = 0;
+    circular_buffer *p_circular_buffer = 0;
+    const void      *result_value      = 0;
+
+    // Build the circular buffer
+    circular_buffer_constructor(&p_circular_buffer);
+
+    // Peek the circular buffer
+    result = circular_buffer_peek(p_circular_buffer, &result_value);
+
+    if (result == zero) goto done;
+    else if ( result_value == expected_value ) result = match;
+
+    done:
+
+    // Free the circular buffer
+    circular_buffer_destroy(&p_circular_buffer);
+
+    // Return result
+    return (result == expected);
+}
+
+/*
 bool test_enqueue ( int (*queue_constructor)(queue **), void *value, result_t  expected )
 {
 
@@ -670,25 +738,6 @@ bool test_dequeue ( int (*queue_constructor)(queue **), void *expected_value  , 
         result = zero;
 
     exit:
-    // Free the queue
-    queue_destroy(&p_queue);
-
-    // Return result
-    return (result == expected);
-}
-
-bool test_empty ( int (*queue_constructor)(queue **), void **expected_values, result_t  expected )
-{
-
-    // Initialized data
-    result_t  result = 0;
-    queue    *p_queue = 0;
-
-    // Build the queue
-    queue_constructor(&p_queue);
-
-    result = queue_empty(p_queue);
-
     // Free the queue
     queue_destroy(&p_queue);
 
