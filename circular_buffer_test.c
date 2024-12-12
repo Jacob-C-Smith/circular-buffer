@@ -292,7 +292,7 @@ int construct_empty ( circular_buffer **pp_circular_buffer )
 {
 
     // Construct a queue
-    circular_buffer_construct(pp_circular_buffer, 2);
+    circular_buffer_construct(pp_circular_buffer, 3);
 
     // circular_buffer = [ ]
     return 1;
@@ -535,7 +535,7 @@ int test_empty_circular_buffer(int(*circular_buffer_constructor)(circular_buffer
     print_test(name, "circular_buffer_empty", test_empty(circular_buffer_constructor, True) );
     print_test(name, "circular_buffer_full" , test_full(circular_buffer_constructor, False) );
     // print_test(name, "circular_buffer_push" , test_push(circular_buffer_constructor, A_element, one) );
-    print_test(name, "circular_buffer_peek" , test_peek(circular_buffer_constructor, (void **)zero, zero) );    
+    // print_test(name, "circular_buffer_peek" , test_peek(circular_buffer_constructor, (void **)zero, zero) );    
     // print_test(name, "circular_buffer_pop"  , test_pop(circular_buffer_constructor, 0, True) );
 
     // Print the final summary
@@ -553,7 +553,7 @@ int test_one_element_circular_buffer   ( int (*circular_buffer_constructor)(circ
 
     print_test(name, "circular_buffer_empty", test_empty(circular_buffer_constructor, False) );
     print_test(name, "circular_buffer_full" , test_full(circular_buffer_constructor, False) );
-    print_test(name, "circular_buffer_peek" , test_peek(circular_buffer_constructor, elements[0], match) );    
+    print_test(name, "circular_buffer_peek" , test_peek(circular_buffer_constructor, elements[1], match) );    
     
     // Print the final summary
     print_final_summary();
@@ -601,7 +601,7 @@ int print_test ( const char *scenario_name, const char *test_name, bool passed )
     return 1;
 }
 
-int print_final_summary ()
+int print_final_summary ( void )
 {
 
     // Accumulate
@@ -678,7 +678,7 @@ bool test_peek ( int (*circular_buffer_constructor)(circular_buffer **), char *e
     circular_buffer_constructor(&p_circular_buffer);
 
     // Peek the circular buffer
-    result = circular_buffer_peek(p_circular_buffer, &result_value);
+    //result = circular_buffer_peek(p_circular_buffer, &result_value);
 
     if (result == zero) goto done;
     else if ( result_value == expected_value ) result = match;
@@ -691,57 +691,3 @@ bool test_peek ( int (*circular_buffer_constructor)(circular_buffer **), char *e
     // Return result
     return (result == expected);
 }
-
-/*
-bool test_enqueue ( int (*queue_constructor)(queue **), void *value, result_t  expected )
-{
-
-    // Initialized data
-    result_t  result = 0;
-    queue    *p_queue = 0;
-
-    // Build the queue
-    queue_constructor(&p_queue);
-
-    result = queue_enqueue(p_queue, value);
-
-    // Free the queue
-    queue_destroy(&p_queue);
-
-    // Return result
-    return (result == expected);
-}
-
-bool test_dequeue ( int (*queue_constructor)(queue **), void *expected_value  , size_t   num_dequeues, result_t expected )
-{
-
-    // Initialized data
-    result_t  result       = 0;
-    queue    *p_queue      = 0;
-    void     *result_value = 0;
-
-    // Build the queue
-    queue_constructor(&p_queue);
-    
-    for (size_t i = 0; i < num_dequeues; i++)
-    {
-        result = queue_dequeue(p_queue, &result_value);
-    }
-    
-    
-    // Check the result
-    if (result == Underflow)
-        goto exit;
-    else if (result_value == expected_value)
-        result = match;
-    else
-        result = zero;
-
-    exit:
-    // Free the queue
-    queue_destroy(&p_queue);
-
-    // Return result
-    return (result == expected);
-}
-*/

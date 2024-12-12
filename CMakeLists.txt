@@ -1,5 +1,5 @@
-# Need CMake 3.28.0
-cmake_minimum_required (VERSION 3.28.0)
+# Need CMake 3.16.0.0
+cmake_minimum_required (VERSION 3.16.0)
 
 # This is the name of the repository
 project ("circular buffer")
@@ -15,10 +15,10 @@ if(MSVC)
 else()
 
     # For clang
-    #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11 -Wall -Wextra -Wpedantic -Weverything -Wno-declaration-after-statement -Ofast")
+    #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11 -Wall -Wextra  -Weverything -Wno-declaration-after-statement -Ofast")
 
     # For GCC
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11 -Wall -Wextra -Wpedantic -Wno-declaration-after-statement -O3")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11 -Wall -Wextra  -Wno-declaration-after-statement -O3")
 endif()
 
 # Comment out for Debug mode
@@ -75,6 +75,13 @@ add_executable (circular_buffer_example "main.c")
 add_dependencies(circular_buffer_example circular_buffer)
 target_include_directories(circular_buffer_example PUBLIC ${CIRCULAR_BUFFER_INCLUDE_DIR})
 target_link_libraries(circular_buffer_example circular_buffer)
+
+# Add source to the example program.
+add_executable (tail "tail.c")
+add_dependencies(tail circular_buffer)
+target_include_directories(tail PUBLIC ${CIRCULAR_BUFFER_INCLUDE_DIR})
+target_link_libraries(tail circular_buffer)
+
 
 # Add source to the tester program.
 add_executable (circular_buffer_test "circular_buffer_test.c")

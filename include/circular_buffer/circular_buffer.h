@@ -31,25 +31,20 @@
 #endif
 
 // Forward declarations
-struct circular_buffer_s;
+// Structure definitions
+struct circular_buffer_s
+{
+	bool full;
+	size_t read, write, length;
+	mutex _lock;
+	void *_p_data[];
+};
 
 // Type definitions
 /** !
  *  @brief The type definition of a circular buffer struct
  */
 typedef struct circular_buffer_s circular_buffer;
-
-// Allocaters
-/** !
- *  Allocate memory for a circular buffer
- *
- * @param pp_circular_buffer return
- *
- * @sa destroy_circular_buffer
- *
- * @return 1 on success, 0 on error
- */
-DLLEXPORT int circular_buffer_create ( circular_buffer **const pp_circular_buffer );
 
 // Constructors
 /** !
@@ -58,7 +53,6 @@ DLLEXPORT int circular_buffer_create ( circular_buffer **const pp_circular_buffe
  * @param pp_circular_buffer return
  * @param size               the maximum quantity of elements 
  *
- * @sa circular_buffer_create
  * @sa circular_buffer_from_contents
  * @sa circular_buffer_destroy
  *
@@ -79,7 +73,7 @@ DLLEXPORT int circular_buffer_construct ( circular_buffer **const pp_circular_bu
  *
  * @return 1 on success, 0 on error
  */
-DLLEXPORT int circular_buffer_from_contents ( circular_buffer **const pp_circular_buffer, void * const* const pp_contents, size_t size );
+DLLEXPORT int circular_buffer_from_contents ( circular_buffer **const pp_circular_buffer, const void *const *pp_contents, size_t size );
 
 // Accessors
 /** !
@@ -150,7 +144,7 @@ DLLEXPORT int circular_buffer_pop  ( circular_buffer *const p_circular_buffer, v
  *
  * @param pp_circular_buffer pointer to the circular buffer
  *
- * @sa circular_buffer_create
+ * @sa circular_buffer_construct
  *
  * @return 1 on success, 0 on error
  */

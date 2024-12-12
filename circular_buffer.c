@@ -9,15 +9,6 @@
 // Header
 #include <circular_buffer/circular_buffer.h>
 
-// Structure definitions
-struct circular_buffer_s
-{
-	bool full;
-	size_t read, write, length;
-	mutex _lock;
-	void *_p_data[];
-};
-
 // Function definitions
 int circular_buffer_create ( circular_buffer **const pp_circular_buffer )
 {
@@ -152,7 +143,7 @@ int circular_buffer_construct ( circular_buffer **const pp_circular_buffer, size
 	}
 }
 
-int circular_buffer_from_contents ( circular_buffer **const pp_circular_buffer, void* const* const pp_contents, size_t size )
+int circular_buffer_from_contents ( circular_buffer **const pp_circular_buffer, const void *const *pp_contents, size_t size )
 {
 
 	// Argument check
@@ -170,7 +161,10 @@ int circular_buffer_from_contents ( circular_buffer **const pp_circular_buffer, 
 	for (size_t i = 0; i < size; i++)
 
 		// Add the item to the circular buffer
-		; // circular_buffer_enqueue(p_circular_buffer, pp_contents[i]);
+		circular_buffer_push(p_circular_buffer, pp_contents[i]);
+	
+	// Return a pointer to the caller
+	*pp_circular_buffer = p_circular_buffer;
 	
 	// Success
 	return 1;
